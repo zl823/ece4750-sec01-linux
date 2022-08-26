@@ -34,7 +34,6 @@ serfvers is source the course setup script. This will ensure your
 environment is setup with everything you need for working on the
 programming assignments. Enter the following command on the command line:
 
-    :::bash
     % source setup-ece4750.sh
 
 Note that you do not need to enter `%` character. In a tutorial like
@@ -50,7 +49,6 @@ will need to manually source the setup script when you are working on
 this course. Enter the following command on the command line to use auto
 setup:
 
-    :::bash
     % source setup-ece4750.sh --enable-auto-setup
 
 Now log out of the `ecelinux` server and log back in. You should see `ECE
@@ -58,7 +56,6 @@ Now log out of the `ecelinux` server and log back in. You should see `ECE
 the course. If at anytime you need to disable auto setup you can use the
 following command:
 
-    :::bash
     % source setup-ece4750.sh --disable-auto-setup
 
 Now that we have source the course setup script we can start to explore
@@ -79,7 +76,6 @@ We begin with the ubiquitous "Hello, World" example. To display the
 message "Hello, World" we will use the `echo` command. The `echo` command
 simply "echoes" its input to the console.
 
-    :::bash
     % echo "Hello, World"
 
 The string we provide to the echo command is called a _command line
@@ -92,7 +88,6 @@ character.
 You can learn more about any Linux command by using the `man` command.
 Try using this to learn more about the `echo` command.
 
-    :::bash
     % man echo
 
 You can use the up/down keys to scroll the manual one line at a time, the
@@ -106,15 +101,13 @@ redirection_ to create simple text files. Command output redirection is
 discussed more in the full tutorial. Command output redirection uses the
 `>` operator to take the output from one command and "redirect" it to a
 file. The following commands will create a new file named
-`ece4750-sec01.txt` that simply contains the text "Computer Systems
-Programming".
+`ece4750-sec01.txt` that simply contains the text "Computer
+Architecture".
 
-    :::bash
-    % echo "Computer Systems Programming" > ece4750-sec01.txt
+    % echo "Computer Architecture" > ece4750-sec01.txt
 
 We can use the `cat` command to quickly display the contents of a file.
 
-    :::bash
     % cat ece4750-sec01.txt
 
 For larger files, `cat` will output the entire file to the console so it
@@ -123,7 +116,6 @@ command to show one screen-full of text at a time. You can use the
 up/down keys to scroll the file one line at a time, the space bar to
 scroll down one page at a time, and the `q` key to quit viewing the file.
 
-    :::bash
     % less ece4750-sec01.txt
 
 The `>` command output redirection operator will always create a brand
@@ -131,14 +123,12 @@ new file (even if the target output file already exists). You can use the
 `>>` operator to append lines to the end of a file. Let's add another
 line to our text file using the `>>` operator.
 
-    :::bash
     % echo "Using C/C++" >> ece4750-sec01.txt
     % cat ece4750-sec01.txt
 
 You can use the `ls` command to list the filenames of the files you have
 created.
 
-    :::bash
     % ls
 
 We can provide command line options to the `ls` command to modify the
@@ -161,7 +151,6 @@ assignments and store your files. You can use the `pwd` command to print
 the directory in which you are currently working, which is known as the
 current working directory.
 
-    :::bash
     % pwd
     /home/netid
 
@@ -179,7 +168,6 @@ We can use the `mkdir` command to make new directories. The following
 command will make a new directory named `ece4750` within your home
 directory.
 
-    :::bash
     % mkdir ece4750
 
 We can use the `cd` command to change our current working directory. The
@@ -187,14 +175,12 @@ following command will change the current working directory to be the
 newly created `ece4750` directory, before displaying the current working
 directory with the pwd command.
 
-    :::bash
     % cd ece4750
     % pwd
     /home/netid/ece4750
 
 Use the `mkdir`, `cd`, and `pwd` commands to make another directory.
 
-    :::bash
     % mkdir sec01
     % cd sec01
     % pwd
@@ -205,16 +191,14 @@ the `ece4750` directory. We might also say that the `ece4750` directory
 is the parent directory of the `sec01` directory. Use the following
 command to create a new file in this child directory.
 
-    :::bash
     % cd /home/netid/ece4750/sec01
-    % echo "Computer Systems Programming" > ece4750-sec01.txt
+    % echo "Computer Architecture" > ece4750-sec01.txt
     % mkdir dirA
     % ls
 
 You can use the `tree` command to visualize the directory layout and
 where files are located:
 
-    :::bash
     % cd ~/ece4750
     % tree
 
@@ -224,7 +208,6 @@ use a single dot (`.`) to refer to the current working directory, and you
 can use a double dot (`..`) to refer to the parent directory of the
 current working directory.
 
-    :::bash
     % cd ~/ece4750/sec01
     % cd ..
     % cd ..
@@ -237,7 +220,6 @@ of the file you want to copy, and the second argument is the new name to
 give to the copy. The following commands will make two copies of the
 files we created in the previous section.
 
-    :::bash
     % cd ~/ece4750/sec01
     % cp ece4750-sec01.txt ece4750-sec01-a.txt
     % cp ece4750-sec01.txt ece4750-sec01-b.txt
@@ -245,14 +227,12 @@ files we created in the previous section.
 
 Instead of copying we can also move a file with the `mv` command:
 
-    :::bash
     % cd ~/ece4750/sec01
     % mv ece4750-sec01.txt ece4750-sec01-c.txt
     % ls
 
 Finally, we can use the `rm` command to remove files.
 
-    :::bash
     % cd ~/ece4750/sec01
     % ls
     % rm ece4750-sec01-a.txt
@@ -262,7 +242,6 @@ wish to delete into a special subdirectory of your home directory located
 at `${HOME}/tmp/trash`. The following commands create a file and then
 deletes it using trash.
 
-    :::bash
     % cd ${HOME}
     % echo "This file will be deleted." > testing.txt
     % trash testing.txt
@@ -284,7 +263,6 @@ remote access option _and_ a text editor. If you are using PowerShell,
 you can use Micro to do basic text editing. You can start Micro like
 this:
 
-    :::bash
     % micro ece4750-sec01-b.txt
 
 Micro is a lightweight text-based text editor. Use _Ctrl-G_ to learn more
@@ -293,7 +271,6 @@ about the keyboard shortcuts you can use to in Micro.
 When you are finished go ahead and trash the `sec01` directory to keep
 things tidy.
 
-    :::bash
     % trash ~/ece4750/sec01
 
 GitHub Account Setup
@@ -331,7 +308,6 @@ GitHub. GitHub uses these keys for authentication. The course setup
 script takes care of creating an SSH key pair which you can use. View the
 contents of your public key using the following commands:
 
-    :::bash
     % cat ~/.ssh/ece4750-github.pub
 
 Use the following page to upload the public key to GitHub:
@@ -343,7 +319,6 @@ displayed using cat into the key textbox. Give the key the title
 `ece4750-github`. Then click _Add SSH key_. To test things out try the
 following command:
 
-    :::bash
     % ssh -T git@github.com
 
 You may see a warning about the authenticity of the host. Don’t worry,
@@ -377,7 +352,6 @@ copy of this repo in your own person GitHub workspace:
 Where `githubid` is your GitHubID. Now let's clone your new repo to the
 `ecelinux` machine.
 
-    :::bash
     % cd ${HOME}/ece4750
     % git clone git@github.com:githubid/ece4750-sec01 sec01
     % cd sec01
@@ -404,7 +378,6 @@ Now use your favorite text editor again to create a file named
 Now let's add these files to our repository. First use the `git status`
 command to check on the status of the repository.
 
-    :::bash
     % cd ${HOME}/ece4750/sec01
     % git status
 
@@ -413,7 +386,6 @@ the working directory but are not currently being tracked by git. Let's
 "add" these two files to git's "staging" area so it now knows it should
 keep track of them:
 
-    :::bash
     % cd ${HOME}/ece4750/sec01
     % git add warm-colors.txt
     % git add cool-colors.txt
@@ -423,7 +395,6 @@ The status of these two files have changed. Git reports that both of the
 new files are ready to be committed. Let's go ahead and commit these
 changes into your local repository.
 
-    :::bash
     % cd ${HOME}/ece4750/sec01
     % git commit -m "add some colors"
 
@@ -432,7 +403,6 @@ add `cyan` to the end of our `cool-colors.txt` file. We can then view our
 changes from the command line using `cat`, and use `git status` and then
 `git commit` to try and commit our changes.
 
-    :::bash
     % cd ${HOME}/ece4750/sec01
     % echo "cyan" >> cool-colors.txt
     % cat cool-colors.txt
@@ -446,7 +416,6 @@ the `-a` command line option with the `git commit` command to tell Git to
 add any file which has changed and was previously added to the repository
 before doing the commit.
 
-    :::bash
     % cd ${HOME}/ece4750/sec01
     % git status
     % git commit -a -m "add cyan"
@@ -454,7 +423,6 @@ before doing the commit.
 Now the changes are committed. You can use `git log` to see a log of the
 commits in your local repository.
 
-    :::bash
     % cd ${HOME}/ece4750/sec01
     % git log
 
@@ -464,7 +432,6 @@ Note that nothing has happened on GitHub yet. GitHub does _not_ know
 anything about these local changes. We need to explicitly "push" our new
 commits up to GitHub like this:
 
-    :::bash
     % cd ${HOME}/ece4750/sec01
     % git push
 
@@ -493,7 +460,6 @@ Now click _Commit new file_. Verify that there is a new file in the repo
 using the GitHub web interface. Now let's "pull" these new changes from
 GitHub to your local repo on `ecelinux`:
 
-    :::bash
     % cd ${HOME}/ece4750/sec01
     % git pull
     % cat languages.txt

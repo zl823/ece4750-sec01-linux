@@ -10,5 +10,5 @@ document in the repo here:
 
 Or online here:
 
- - https://cornell-ece4750.github.io/ece4750-S01-linux
+ - https://cornell-ece4750.github.io/ece4750-sec01-linux
 
