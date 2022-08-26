@@ -492,10 +492,10 @@ For ECE 2400 Alumni (or Advanced Students)
 For students that took ECE 2400, they will recognize this section as
 being identical to the first section in ECE 2400. We are trying to make
 sure all students are able to successfully log in to the `ecelinux`
-servers, have their GitHub accoutn setup correctly, and understand the
-basic Git workflow. ECE 2400 students probably already know all of this.
-They should still confirm they can fork and clone the example GitHub repo
-and then push/pull to this repo.
+servers, setup their GitHub account correctly, and understand the basic
+Git workflow. ECE 2400 students probably already know all of this. They
+should still confirm they can fork and clone the example GitHub repo and
+then push/pull to this repo.
 
 ECE 2400 students may want to experiment with cross-compiling C code
 (like we wrote in ECE 2400) for the RISC-V instruction set architecture
