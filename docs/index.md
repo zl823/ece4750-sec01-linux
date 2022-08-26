@@ -11,6 +11,7 @@ ECE 4750 Section 1: Linux Development Environment
  - Linux Command Line
  - GitHub Account Setup
  - Git Version Control System
+ - To-Do On Your Own
  - For ECE 2400 Alumni or Advanced Students
 
 This discussion section serves as gentle introduction to the basics of
@@ -144,7 +145,7 @@ Obviously, having all files in a single location would be hard to manage
 effectively. We can use directories (also called folders) to logically
 organize our files, just like one can use physical folders to organize
 physical pieces of paper. The mechanism for organizing files and
-directories is called the file system. When you first login to an
+directories is called the file system. When you first log in to an
 `ecelinux` machine, you will be in your home directory. This is your own
 private space on the server that you can use to work on the programming
 assignments and store your files. You can use the `pwd` command to print
@@ -342,18 +343,18 @@ We won't actually be forking repos for the programming assignments, but
 it is an easy way for you to grab some example code for the discussion
 section. Go to the example repo here:
 
- - <https://github.com/cornell-ece4750/ece4750-sec01>
+ - <https://github.com/cornell-ece4750/ece4750-sec01-linux>
 
 Click on the "Fork" button. Wait a few seconds and then visit the new
 copy of this repo in your own person GitHub workspace:
 
- - `https://github.com/githubid/ece4750-sec01`
+ - `https://github.com/githubid/ece4750-sec01-linux`
 
 Where `githubid` is your GitHubID. Now let's clone your new repo to the
 `ecelinux` machine.
 
     % cd ${HOME}/ece4750
-    % git clone git@github.com:githubid/ece4750-sec01 sec01
+    % git clone git@github.com:githubid/ece4750-sec01-linux sec01
     % cd sec01
     % cat README.md
 
@@ -438,23 +439,23 @@ commits up to GitHub like this:
 Now go to the repository page using the GitHub web interface and verify
 that there are two new files.
 
- - `https://github.com/githubid/ece4750-sec01`
+ - `https://github.com/githubid/ece4750-sec01-linux`
 
 ### Pulling Files from GitHub
 
 Let's try making a change to this repository through the GitHub
 web interface.
 
- - `https://github.com/githubid/ece4750-sec01`
+ - `https://github.com/githubid/ece4750-sec01-linux`
 
 Click on _Add file_ and then _Create new file_. Name the file
-`languages.txt` and add a list of programming languages:
+`architectures.txt` and add a list of programming languages:
 
-    C
-    C++
-    Python
-    MATLAB
-    Java
+    IBM 360
+    MIPS32
+    RISC-V RV32IM
+    Intel x86
+    ARM v8
 
 Now click _Commit new file_. Verify that there is a new file in the repo
 using the GitHub web interface. Now let's "pull" these new changes from
@@ -462,7 +463,7 @@ GitHub to your local repo on `ecelinux`:
 
     % cd ${HOME}/ece4750/sec01
     % git pull
-    % cat languages.txt
+    % cat architectures.txt
 
 This will be the basic GitHub workflow were students first use `clone` to
 get a copy of their repository, use `commit -a` to commit their code to
@@ -484,4 +485,18 @@ Then try editing a file using the GitHub web interface. Click on the
 corner to edit this text file. Add another warm color. Click _Commit
 changes_. Then pull these changes to the local repository on the
 `ecelinux` server and verify that your new warm color is included.
+
+For ECE 2400 Alumni (or Advanced Students)
+--------------------------------------------------------------------------
+
+For students that took ECE 2400, they will recognize this section as
+being identical to the first section in ECE 2400. We are trying to make
+sure all students are able to successfully log in to the `ecelinux`
+servers, have their GitHub accoutn setup correctly, and understand the
+basic Git workflow. ECE 2400 students probably already know all of this.
+They should still confirm they can fork and clone the example GitHub repo
+and then push/pull to this repo. These students then may want to
+experiment with cross-compiling C code (like we wrote in ECE 2400) for
+the RISC-V instruction set architecture and then running the resulting
+binary on a RISC-V instruction set simulator as discussed below.
 
