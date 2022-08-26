@@ -1,9 +1,9 @@
 
-ECE 5745 Section 1: ASIC Flow Front-End
+ECE 4750 Section 1: Linux Development Environment
 ==========================================================================
 
  - Author: Christopher Batten
- - Date: January 27, 2021
+ - Date: August 26, 2022
 
 **Table of Contents**
 
@@ -14,684 +14,548 @@ ECE 5745 Section 1: ASIC Flow Front-End
  - Using Synopsys Design Compiler for Synthesis
  - Using Synopsys VCS for Fast-Functional Gate-Level Simulation
 
-Introduction
+This discussion section serves as gentle introduction to the basics of
+using the Linux development environment on the `ecelinux` servers
+including how to log into the servers, how to work at the Linux command
+line, and how to use Git version control.
+
+1. Logging Into ecelinux with PowerShell
 --------------------------------------------------------------------------
 
-In this section, we will be discussing the front-end of the ASIC
-toolflow. More detailed tutorials will be posted on the public course
-website, but this section will at least give you a chance to edit some
-RTL, synthesize that to a gate-level netlist, and then simulate that
-gate-level netlist. The following diagram illustrates the tool flow we
-will be using in ECE 5745. Notice that the Synopsys and Cadence ASIC
-tools all require various views from the standard-cell library which part
-of the ASIC design kit (ADK).
+We will be using the `ecelinux` servers for all of the programming
+assignments. The `ecelinux` servers all run the Red Hat Enterprise Linux
+7 operating system, and they all use an identical setup. Linux is the
+operating system of choice for both cloud and IoT systems, so becoming
+familiar with Linux will pay dividends beyond just this course.
 
-![](assets/fig/asic-flow-front-end.png)
+For today's discussion section we will be using PowerShell to log into
+the `ecelinux` servers. Next week we will be using VS Code to log into
+the `ecelinux` servers which is remote access option we recommend for
+most students. You can learn more about the various remote access options
+in this tutorial:
 
-The "front-end" of the flow is highlighted in red and refers to
-the PyMTL simulator, Synopsys DC, and Synopsys VCS:
+ - <https://www.csl.cornell.edu/courses/ece2400/handouts/ece2400-tut0-access.pdf>
 
- - We use the PyMTL framework to test, verify, and evaluate the execution
-   time (in cycles) of our design. This part of the flow is very similar
-   to the flow used in ECE 4750. Note that we can write our RTL models in
-   either PyMTL or Verilog. Once we are sure our design is working
-   correctly, we can then start to push the design through the flow. The
-   ASIC flow requires Verilog RTL as an input, so we can use PyMTL's
-   automatic translation tool to translate PyMTL RTL models into Verilog
-   RTL.
+### 1.1. Logging into `ecelinux` Servers with PowerShell
 
- - We use Synopsys Design Compiler (DC) to synthesize our design, which
-   means to transform the Verilog RTL model into a Verilog gate-level
-   netlist where all of the gates are selected from the standard-cell
-   library. We need to provide Synopsys DC with abstract logical and
-   timing views of the standard-cell library in `.db` format. In addition
-   to the Verilog gate-level netlist, Synopsys DC can also generate a
-   `.ddc` file which contains information about the gate-level netlist
-   and timing, and this `.ddc` file can be inspected using Synopsys
-   Design Vision (DV).
+To start PowerShell click the _Start_ menu then choose _Windows
+PowerShell > Windows PowerShell_, or click the _Start_ menu, type
+_PowerShell_, and choose _Windows PowerShell_.
 
- - We use Synopsys VCS for RTL and gate-level simulation. PyMTL uses
-   two-state RTL simulation meaning every wire will be either a 0 (logic
-   low) or 1 (logic high). Synopsys VCS uses four-state RTL simulation
-   meaning every wire will be either a 0 (logic low), 1 (logic high), X
-   (unknown), or Z (floating). Four-state RTL simulation can identify
-   different kinds of bugs than two-state simulation such as bugs due to
-   uninitialized state. Gate-level simulation involves simulating every
-   standard-cell gate and helps verify that the Verilog gate-level
-   netlist is functionally correct.
+After starting PowerShell, type in the following command at the prompt to
+log into the ecelinux servers using SSH.
 
-Extensive documentation is provided by Synopsys and Cadence. We have
-organized this documentation and made it available to you on the [public
-course webpage](http://www.csl.cornell.edu/courses/ece5745/syndocs). The
-username/password is on Canvas.
+    ::bash
+    % ssh netid@ecelinux.ece.cornell.edu
 
-The first step is to start access `ecelinux` using X2Go and then open a
-terminal. Once you are at the `ecelinux` prompt, source the setup script,
-clone this repository from GitHub, and define an environment variable to
-keep track of the top directory for the project.
+Replace netid with your Cornell NetID in the command above. You should
+not enter the `%` character. We use the `%` character to indicate what
+commands we should enter on the command line. Executing the command will
+prompt you to enter your Cornell NetID password, and then you should be
+connected to the ecelinux servers.
 
-    % source setup-ece5745.sh
-    % mkdir -p $HOME/ece5745
-    % cd $HOME/ece5745
-    % git clone https://github.com/cornell-ece5745/ece5745-S01-front-end
-    % cd ece5745-S01-front-end
-    % TOPDIR=$PWD
+The very first time you log into the ecelinux servers you may see a
+warning like this:
 
-NanGate 45nm Standard-Cell Libraries
+     The authenticity of host ’ecelinux.ece.cornell.edu (128.253.51.206)’ can’t be established.
+     ECDSA key fingerprint is SHA256:smwMnf9dyhs5zW5I279C5oJBrTFc5FLghIJMfBR1cxI.
+     Are you sure you want to continue connecting (yes/no)?
+
+The very first time you log into the `ecelinux` servers it is okay to
+enter `yes`, but from then on if you continue to receive this warning
+please contact the course staff.
+
+### 1.2. Using PowerShell
+
+The very first thing you need to do after opening a terminal is source
+the course setup script. This will ensure your environment is setup with
+everything you need for working on the programming assignments. Enter the
+following command on the command line:
+
+    :::bash
+    % source setup-ece2400.sh
+
+Note that you do not need to enter `%` character. In a tutorial like
+this, the `%` simply indicates what you should type at the command line.
+You should now see `ECE 2400` in your prompt which means your environment
+is setup for the course.
+
+It can be tedious to always remember to source the course setup script.
+You can also use _auto setup_ which will automatically source the course
+setup for you when you log in. Note that if the environment for ECE 2400
+conflicts with the environment required by a different course then you
+will need to manually source the setup script when you are working on
+this course. Enter the following command on the command line to use
+auto setup:
+
+    :::bash
+    % source setup-ece2400.sh --enable-auto-setup
+
+Now close the terminal using the X icon in the upper right-hand corner of
+the terminal window. Reopen a new terminal window. You should see `ECE
+2400` in the prompt meaning your environment is automatically setup for
+the course. If at anytime you need to disable auto setup you can use the
+following command:
+
+    :::bash
+    % source setup-ece2400.sh --disable-auto-setup
+
+Now that we have source the course setup script we can start to explore
+the Linux command line.
+
+2. Linux Command Line
 --------------------------------------------------------------------------
 
-A standard-cell library is a collection of combinational and sequential
-logic gates that adhere to a standardized set of logical, electrical, and
-physical policies. For example, all standard cells are usually the same
-height, include pins that align to a predetermined vertical and
-horizontal grid, include power/ground rails and nwells in predetermined
-locations, and support a predetermined number of drive strengths. In this
-course, we will be using the a NanGate 45nm standard-cell library. It is
-based on a "fake" 45nm technology. This means you cannot actually tapeout
-a design using this standard cell library, but the technology is
-representative enough to provide reasonable area, energy, and timing
-estimates for teaching purposes. All of the files associated with this
-standard cell library are located in the `$ECE5745_STDCELLS` directory.
+We will using the `ecelinux` servers which run the Red Hat Enterprise
+Linux 7 operating system for all of the programming assignments. The
+heart of the Linux operating system is the Linux command line. This is a
+text-based console where you can enter commands to interact with the
+operating system.
 
-Let's take a look at some layout for some cells.
+### 2.1 Hello World
 
-    % klayout -l $ECE5745_STDCELLS/klayout.lyp $ECE5745_STDCELLS/stdcells.gds
+We begin with the ubiquitous "Hello, World" example. To display the
+message "Hello, World" we will use the `echo` command. The `echo` command
+simply "echoes" its input to the console.
 
-Let's look at a 3-input NAND cell, find the NAND3_X1 cell in the
-left-hand cell list, and then choose _Display > Show as New Top_ from the
-menu. We will learn more about layout and how this layout corresponds to
-a static CMOS circuit later in the course. The key point is that the
-layout for the standard cells are the basic building blocks that we will
-be using to create our ASIC chips.
+    :::bash
+    % echo "Hello, World"
 
-The Synopsys and Cadence tools do not actually use this layout directly;
-it is actually _too_ detailed. Instead these tools use abstract views of
-the standard cells, which capture logical functionality, timing,
-geometry, and power usage at a much higher level. Let's look at the
-Verilog behavioral specification for the 3-input NAND cell.
+The string we provide to the echo command is called a _command line
+argument_. We use command line arguments to tell commands what they
+should operate on. Again, note that you do not need to enter `%`
+character.
 
-    % less -p NAND3_X1 $ECE5745_STDCELLS/stdcells.v
+### 2.2. Manual Pages
 
-Note that the Verilog implementation of the 3-input NAND cell looks
-nothing like the Verilog we used in ECE 4750. This cell is implemented
-using three Verilog primitive gates (i.e., two `and` gates and one `not`
-gate), and it includes a `specify` block which is used for advanced
-gate-level simulation with back-annotated delays.
+You can learn more about any Linux command by using the `man` command.
+Try using this to learn more about the `echo` command.
 
-Finally, let's look at an abstract view of the timing and power of the
-3-input NAND cell suitable for use by the ASIC flow. This abstract view
-is in the `.lib` file for the standard cell library.
+    :::bash
+    % man echo
 
-    % less -p NAND3_X1 $ECE5745_STDCELLS/stdcells.lib
+You can use the up/down keys to scroll the manual one line at a time, the
+space bar to scroll down one page at a time, and the `q` key to quit
+viewing the manual.
 
-Now that we have looked at some of the views of the standard cell
-library, we can now try using these views and the ASIC flow front-end to
-synthesize RTL into a gate-level netlist.
+### 2.3. Create, View, and List Files
 
-PyMTL-Based Testing, Simulation, Translation
---------------------------------------------------------------------------
+We can use the echo command and a feature called _command output
+redirection_ to create simple text files. Command output redirection is
+discussed more in the full tutorial. Command output redirection uses the
+`>` operator to take the output from one command and "redirect" it to a
+file. The following commands will create a new file named
+`ece2400-sec01.txt` that simply contains the text "Computer Systems
+Programming".
 
-Our goal in this section is to generate a gate-level netlist for
-the following four-stage registered incrementer:
+    :::bash
+    % echo "Computer Systems Programming" > ece2400-sec01.txt
 
-![](assets/fig/regincr-nstage.png)
+We can use the `cat` command to quickly display the contents of a file.
 
-We will take an incremental design approach. We will start by
-implementing and testing a single registered incrementer, and then we
-will write a generic multi-stage registered incrementer. For this section
-(and indeed the entire course) your test harnesses, simulation drivers,
-function-level models, and cycle-level models will all be written in
-PyMTL. However, you are free to do your actual RTL design work in either
-PyMTL or Verilog. Prof. Batten will now spend a few minutes explaining
-how PyMTL works using these slides:
+    :::bash
+    % cat ece2400-sec01.txt
 
-  - [https://www.csl.cornell.edu/courses/ece5745/handouts/ece5745-S01-front-end-slides.pdf](https://www.csl.cornell.edu/courses/ece5745/handouts/ece5745-S01-front-end-slides.pdf)
+For larger files, `cat` will output the entire file to the console so it
+may be hard to read the file as it streams past. We can use the `less`
+command to show one screen-full of text at a time. You can use the
+up/down keys to scroll the file one line at a time, the space bar to
+scroll down one page at a time, and the `q` key to quit viewing the file.
 
-### Choose RTL Design Language
+    :::bash
+    % less ece2400-sec01.txt
 
-So the first step is to decide if you want to do this section using PyMTL
-RTL or Verilog RTL. Edit these two files using `geany` or your favorite
-text editor to let the framework know your choice:
+The `>` command output redirection operator will always create a brand
+new file (even if the target output file already exists). You can use the
+`>>` operator to append lines to the end of a file. Let's add another
+line to our text file using the `>>` operator.
 
-    % geany $TOPDIR/sim/regincr/RegIncrRTL.py
-    % geany $TOPDIR/sim/regincr/RegIncrNstageRTL.py
+    :::bash
+    % echo "Using C/C++" >> ece2400-sec01.txt
+    % cat ece2400-sec01.txt
 
-Set the `rtl_language` variable to `verilog` if you want to use Verilog
-for your RTL design and set it to `pymtl` if you want to use PyMTL for
-your RTL design. For example, this is what it would look like to use
-`verilog`:
+You can use the `ls` command to list the filenames of the files you have
+created.
 
-    rtl_language = 'verilog'
-
-### Implement, Test, and Translate a Registered Incrementer
-
-Now let's run all of the tests for the registered incrementer:
-
-    % mkdir -p $TOPDIR/sim/build
-    % cd $TOPDIR/sim/build
-    % pytest ../regincr
-
-The tests will fail because we need to finish the implementation. Let's
-start by focusing on the basic registered incrementer module.
-
-    % cd $TOPDIR/sim/build
-    % pytest ../regincr/RegIncrRTL_test.py
-
-Use `geany` or your favorite text editor to open the implementation and
-uncomment the actual combinational logic for the increment operation. So
-a PyMTL RTL implementation should look as follows:
-
-    from pymtl3 import *
-
-    class RegIncrPRTL( Component ):
-
-      # Constructor
-
-      def construct( s ):
-
-        # Port-based interface
-
-        s.in_ = InPort  ( Bits8 )
-        s.out = OutPort ( Bits8 )
-
-        # Sequential logic
-
-        s.reg_out = Wire( 8 )
-
-        @update_ff
-        def block1():
-          if s.reset:
-            s.reg_out <<= 0
-          else:
-            s.reg_out <<= s.in_
-
-        # Combinational logic
-
-        s.temp_wire = Wire( 8 )
-
-        @update
-        def block2():
-          s.temp_wire @= s.reg_out + 1
-
-        # Combinational logic
-
-        s.out //= s.temp_wire
-
-      def line_trace( s ):
-        return f"{s.in_} ({s.reg_out}) {s.out}"
-
-A Verilog RTL implementation should look as follows:
-
-    `ifndef REG_INCR_V
-    `define REG_INCR_V
-
-    module RegIncrVRTL
-    (
-      input  logic       clk,
-      input  logic       reset,
-      input  logic [7:0] in_,
-      output logic [7:0] out
-    );
-
-      // Sequential logic
-
-      logic [7:0] reg_out;
-
-      always @( posedge clk ) begin
-        if ( reset )
-          reg_out <= 0;
-        else
-          reg_out <= in_;
-      end
-
-      // Combinational logic
-
-      logic [7:0] temp_wire;
-
-      always @(*) begin
-        temp_wire = reg_out + 1;
-      end
-
-      // Combinational logic
-
-      assign out = temp_wire;
-
-    endmodule
-
-    `endif /* REG_INCR_V */
-
-If you have an error you can use a trace-back to get a more detailed
-error message:
-
-    % cd $TOPDIR/sim/build
-    % pytest ../regincr/RegIncrRTL_test.py --tb=long
-
-Once you have finished the implementation let's rerun the tests:
-
-    % cd $TOPDIR/sim/build
-    % pytest ../regincr/RegIncrRTL_test.py -sv
-
-The `-v` command line option tells `pytest` to be more verbose in its
-output and the `-s` command line option tells `pytest` to print out the
-line tracing. Make sure you understand the line tracing output. You can
-also dump VCD files for waveform debugging with `gtkwave`:
-
-    % cd $TOPDIR/sim/build
-    % pytest ../regincr/RegIncrRTL_test.py -sv --dump-vcd
-    % gtkwave regincr.RegIncrRTL_test__test_small.vcd
-
-If you are using Verilog RTL instead of PyMTL RTL, you need to use this:
-
-    % cd $TOPDIR/sim/build
-    % gtkwave regincr.RegIncrRTL_test__test_small_top.verilator1.vcd
-
-PyMTL supports automatically translating PyMTL RTL into Verilog RTL so we
-can then use that Verilog RTL with the ASIC flow. To test the translated
-verilog RTL you can use the `--test-verilog` command line option:
-
-    % cd $TOPDIR/sim/build
-    % pytest ../regincr/RegIncrRTL_test.py --test-verilog
-    % ls *.v
-    % less RegIncrRTL__pickled.v
-
-You should use `--test-verilog` regardless of whether or not you
-implemented your design using PyMTL RTL or Verilog RTL. Take a look at
-the generated Verilog RTL. If you did your design in Verilog RTL then it
-won't generate any Verilog since we still have the Verilog RTL that you
-wrote by hand. If you did your design in PyMTL RTL, hopefully it should
-be clear the one-to-one mapping from PyMTL RTL to Verilog RTL.
-
-### Implement, Test, and Translate Multi-Stage Registered Incrementer
-
-Now let's work on composing a single registered incrementer into a
-multi-stage registered incrementer. We will be using _static elaboration_
-to make the multi-stage registered incrementer _generic_. In other words,
-our design will be parameterized by the number of stages so we can easily
-generate a pipeline with one stage, two stages, four stages, etc. Let's
-start by running all of the tests for the multi-stage registered
-incrementer.
-
-    % cd $TOPDIR/sim/build
-    % pytest ../regincr/RegIncrNstageRTL_test.py
-
-Use geany or your favorite text editor to open the implementation and
-uncomment the static elabroation logic to instantiate a pipeline of
-registered incrementers. So a PyMTL RTL implementation should look as
-follows:
-
-    from pymtl3 import *
-    from pymtl3.passes.backends.verilog import TranslationConfigs
-    from .RegIncrRTL import RegIncrRTL
-
-    class RegIncrNstagePRTL( Component ):
-
-      # Constructor
-
-      def construct( s, nstages=2 ):
-
-        # Port-based interface
-
-        s.in_ = InPort  ( Bits8 )
-        s.out = OutPort ( Bits8 )
-
-        # Instantiate the registered incrementers
-
-        s.reg_incrs = [ RegIncrRTL() for _ in range(nstages) ]
-
-        # Connect input port to first reg_incr in chain
-
-        connect( s.in_, s.reg_incrs[0].in_ )
-
-        # Connect reg_incr in chain
-
-        for i in range( nstages - 1 ):
-          connect( s.reg_incrs[i].out, s.reg_incrs[i+1].in_ )
-
-        # Connect last reg_incr in chain to output port
-
-        connect( s.reg_incrs[-1].out, s.out )
-
-      # Line tracing
-
-    def line_trace( s ):
-      pipe_str = '|'.join([ str(reg_incr.out) for reg_incr in s.reg_incrs ])
-      return f"{s.in_} ({pipe_str}) {s.out}"
-
-So a Verilog RTL implementation should look as follows:
-
-    `ifndef REG_INCR_NSTAGE_V
-    `define REG_INCR_NSTAGE_V
-
-    `include "regincr/RegIncrVRTL.v"
-
-    module RegIncrNstageVRTL
-    #(
-      parameter nstages = 2
-    )(
-      input  logic       clk,
-      input  logic       reset,
-      input  logic [7:0] in_,
-      output logic [7:0] out
-    );
-
-      // This defines an _array_ of signals. There are p_nstages+1 signals
-      // and each signal is 8 bits wide. We will use this array of
-      // signals to hold the output of each registered incrementer stage.
-
-      logic [7:0] reg_incr_out [nstages+1];
-
-      // Connect the input port of the module to the first signal in the
-      // reg_incr_out signal array.
-
-      assign reg_incr_out[0] = in_;
-
-      // Instantiate the registered incrementers and make the connections
-      // between them using a generate block.
-
-      genvar i;
-      generate
-      for ( i = 0; i < nstages; i = i + 1 ) begin: gen
-
-        RegIncrVRTL reg_incr
-        (
-          .clk   (clk),
-          .reset (reset),
-          .in_   (reg_incr_out[i]),
-          .out   (reg_incr_out[i+1])
-        );
-
-      end
-      endgenerate
-
-      // Connect the last signal in the reg_incr_out signal array to the
-      // output port of the module.
-
-      assign out = reg_incr_out[nstages];
-
-    endmodule
-
-    `endif /* REG_INCR_NSTAGE_V */
-
-Before re-running the tests, let's take a look at how we are doing the
-testing in the corresponding test script. Use `geany` or your favorite
-text editor to open up `RegIncrNstageRTL_test.py`. Notice how PyMTL
-enables sophisticated testing for highly parameterized components. The
-test script includes directed tests for two and three stage pipelines
-with various small, large, and random values, and also includes random
-testing with 1, 2, 3, 4, 5, 6 stages. Writing a similar test harness in
-Verilog would likely require 10x more code and be significantly more
-tedious!
-
-Let's re-run a single test and use line tracing to see the data moving
-through the pipeline:
-
-    % cd $TOPDIR/sim/build
-    % pytest ../regincr/RegIncrNstageRTL_test.py -sv -k 4stage_small
-
-And now let's run all of the tests both without and with translation:
-
-    % cd $TOPDIR/sim/build
-    % pytest ../regincr/RegIncrNstageRTL_test.py -sv
-    % pytest ../regincr/RegIncrNstageRTL_test.py --test-verilog
-    % ls *.v
-    % less RegIncr4stageRTL__pickled.v
-
-Notice how we have generated a wrapper which picks a specific parameter
-value for this instance of the multi-stage registered incrementer.
-
-Finally, we are going to run all of the tests with the `--dump-vtb`
-option which will generate a Verilog test-bench that can then be used for
-RTL and gate-level simulation.
-
-    % cd $TOPDIR/sim/build
-    % pytest ../regincr/RegIncrNstageRTL_test.py --test-verilog --dump-vtb
-    % ls *.v
-    % less RegIncr4stageRTL_test_4stage_random_tb.v
-    % less RegIncr4stageRTL_test_4stage_random_tb.v.cases
-
-### Simulate Multi-Stage Registered Incrementer
-
-Test scripts are great for verification, but when we want to push a
-design through the flow we usually want to use a simulator to drive that
-process. A simulator is meant for evaluting the area, energy, and
-performance of a design as opposed to verification. We have included a
-simple simulator called `regincr-sim` which takes a list of values on the
-command line and sends these values through the pipeline. Let's see the
-simulator in action:
-
-    % cd $TOPDIR/sim/build
-    % ../regincr/regincr-sim 0x10 0x20 0x30 0x40
-    % less RegIncr4stageRTL__pickled.v
-
-We now have the Verilog RTL that we want push through the next step in
-the ASIC front-end flow.
-
-Using Synopsys VCS for 4-State RTL Simulation
---------------------------------------------------------------------------
-
-Recall that PyMTL3 simulation of PyMTL3 RTL or Verilog RTL uses two-state
-simulation. To help catch bugs due to uninitialized state (and also just
-to help verify the design using another Verilog simulator), we can use
-Synopsys VCS for four-state RTL simulation. This simulator will make use
-of the Verilog test-bench generated by the `--dump-vtb` option from
-earlier (although we could also write our own Verilog test-bench from
-scratch). Here is how to run VCS for RTL simulation:
-
-    % mkdir -p $TOPDIR/asic/synopsys-vcs-rtl-sim
-    % cd $TOPDIR/asic/synopsys-vcs-rtl-sim
-    % vcs -full64 -sverilog +lint=all -xprop=tmerge -override_timescale=1ns/1ps \
-        +incdir+../../sim/build \
-        +vcs+dumpvars+vcs-rtl-sim.vcd \
-        -top RegIncr4stageRTL_tb \
-        ../../sim/build/RegIncr4stageRTL__pickled.v \
-        ../../sim/build/RegIncr4stageRTL_test_4stage_random_tb.v
-
-This is a pretty long command line! We will go over some of these options
-in the discussion section. However, we also provide you a shell script
-that has the command ready for you to use.
-
-    % cd $TOPDIR/asic/synopsys-vcs-rtl-sim
-    % source run.sh
+    :::bash
     % ls
 
-You should see a `simv` binary which is the compiled RTL simulator which
-you can run like this:
+We can provide command line options to the `ls` command to modify the
+command’s behavior. For example, we can use the `-1` (i.e., a dash
+followed by the number one) command line option to list one file per
+line, and we can we can use the `-l` (i.e., a dash followed by the letter
+l) command line option to provide a longer listing with more information
+about each file.
 
-    % cd $TOPDIR/asic/synopsys-vcs-rtl-sim
-    % ./simv
+### 2.4. Create, Change, and List Directories
 
-It should pass the test. Now let's look at the resulting waveforms.
+Obviously, having all files in a single location would be hard to manage
+effectively. We can use directories (also called folders) to logically
+organize our files, just like one can use physical folders to organize
+physical pieces of paper. The mechanism for organizing files and
+directories is called the file system. When you first login to an
+`ecelinux` machine, you will be in your home directory. This is your own
+private space on the server that you can use to work on the programming
+assignments and store your files. You can use the `pwd` command to print
+the directory in which you are currently working, which is known as the
+current working directory.
 
-    % gtkwave vcs-rtl-sim.vcd
+    :::bash
+    % pwd
+    /home/netid
 
-Browse the signal hierarchy and view the waveforms for one of the four
-registered incrementers. Note how the signals are initialized to X and
-only become 0 or 1 after a few cycles once we come out of reset. If we
-improperly used an initialized value then we would see X-propagation
-which would hopefully cause a failing test case.
+You should see output similar to what is shown above, but instead of
+`netid` it should show your actual NetID. The pwd command shows a
+directory path. A directory path is a list of nested directory names; it
+describes a "path" to get to a specific file or directory. So the above
+path indicates that there is a toplevel directory named home that
+contains a directory named `netid`. This is the directory path to your
+home directory. As an aside, notice that Linux uses a forward slash (`/`)
+to separate directories, while Windows uses a back slash (`\`) for the
+same purpose.
 
-Using Synopsys Design Compiler for Synthesis
+We can use the `mkdir` command to make new directories. The following
+command will make a new directory named `ece2400` within your home
+directory.
+
+    :::bash
+    % mkdir ece2400
+
+We can use the `cd` command to change our current working directory. The
+following command will change the current working directory to be the
+newly created `ece2400` directory, before displaying the current working
+directory with the pwd command.
+
+    :::bash
+    % cd ece2400
+    % pwd
+    /home/netid/ece2400
+
+Use the `mkdir`, `cd`, and `pwd` commands to make another directory.
+
+    :::bash
+    % mkdir sec01
+    % cd sec01
+    % pwd
+    /home/netid/ece2400/sec01
+
+We sometimes say that `sec01` is a subdirectory or a child directory of
+the `ece2400` directory. We might also say that the `ece2400` directory
+is the parent directory of the `sec01` directory. Use the following
+command to create a new file in this child directory.
+
+    :::bash
+    % cd /home/netid/ece2400/sec01
+    % echo "Computer Systems Programming" > ece2400-sec01.txt
+    % mkdir dirA
+    % ls
+
+You can use the `tree` command to visualize the directory layout and
+where files are located:
+
+    :::bash
+    % cd ~/ece2400
+    % tree
+
+Note that the tilde character (`~`) is a shortcut which always refers to
+your home directory. There are a few other very useful shortcuts. You can
+use a single dot (`.`) to refer to the current working directory, and you
+can use a double dot (`..`) to refer to the parent directory of the
+current working directory.
+
+    :::bash
+    % cd ~/ece2400/sec01
+    % cd ..
+    % cd ..
+    % pwd
+
+### 2.5. Copy, Move, and Remove Files and Directories
+
+We can use the `cp` command to copy files. The first argument is the name
+of the file you want to copy, and the second argument is the new name to
+give to the copy. The following commands will make two copies of the
+files we created in the previous section.
+
+    :::bash
+    % cd ~/ece2400/sec01
+    % cp ece2400-sec01.txt ece2400-sec01-a.txt
+    % cp ece2400-sec01.txt ece2400-sec01-b.txt
+    % ls
+
+Instead of copying we can also move a file with the `mv` command:
+
+    :::bash
+    % cd ~/ece2400/sec01
+    % mv ece2400-sec01.txt ece2400-sec01-c.txt
+    % ls
+
+Finally, we can use the `rm` command to remove files.
+
+    :::bash
+    % cd ~/ece2400/sec01
+    % ls
+    % rm ece2400-sec01-a.txt
+
+We have installed a simple program called `trash` which moves files you
+wish to delete into a special subdirectory of your home directory located
+at `${HOME}/tmp/trash`. The following commands create a file and then
+deletes it using trash.
+
+    :::bash
+    % cd ${HOME}
+    % echo "This file will be deleted." > testing.txt
+    % trash testing.txt
+    % echo "This file will also be deleted." > testing.txt
+    % trash testing.txt
+    % ls ${HOME}/tmp/trash
+
+If you look in `${HOME}/tmp/trash` you will see subdirectories organized
+by date. Look in the subdirectory with today's date and you should two
+files corresponding to the two files you deleted. We highly recommend
+always using the `trash` command instead of `rm` since this avoids
+accidentally deleting your work.
+
+### 2.6. Text Editors
+
+Students are free to use any text editor they want, although we recommend
+students use VS Code which will learn about next week. VS Code is both a
+remote access option _and_ a text editor. If you are using PowerShell,
+you can use Micro to do basic text editing. You can start Micro like
+this:
+
+    :::bash
+    % micro ece2400-sec01-b.txt
+
+Micro is a lightweight text-based text editor. Use _Ctrl-G_ to learn more
+about the keyboard shortcuts you can use to in Micro.
+
+When you are finished go ahead and trash the `sec01` directory to keep
+things tidy.
+
+    :::bash
+    % trash ~/ece2400/sec01
+
+3. GitHub Account Setup
 --------------------------------------------------------------------------
 
-We use Synopsys Design Compiler (DC) to synthesize Verilog RTL models
-into a gate-level netlist where all of the gates are from the standard
-cell library. So Synopsys DC will synthesize the Verilog + operator into
-a specific arithmetic block at the gate-level. Based on various
-constraints it may synthesize a ripple-carry adder, a carry-look-ahead
-adder, or even more advanced parallel-prefix adders.
+We will be using GitHub for centralized repository hosting. You can check
+to see if you have a GitHub account on `github.com` using this link:
+`https://github.com/githubid` where `githubid` is your GitHub username on
+`github.com`. If the above link does not work, then you do not have an
+GitHub account on `github.com`. **NOTE: We are using `github.com` not the
+Cornell hosted GitHub!** You will need to create one here:
 
-We start by creating a subdirectory for our work, and then launching
-Synopsys DC.
+ - <https://github.com/join>
 
-    % mkdir -p $TOPDIR/asic/synopsys-dc-synth
-    % cd $TOPDIR/asic/synopsys-dc-synth
-    % dc_shell-xg-t
+Your NetID makes a great GitHub username on `github.com`. Be sure to use
+your Cornell University email address.
 
-We need to set two variables before starting to work in Synopsys DC.
-These variables tell Synopsys DC the location of the standard cell
-library `.db` file which is just a binary version of the `.lib` file we
-saw earlier.
+Once your account is setup, please make sure you set your full name so we
+can know who you are on GitHub. Please also consider uploading a profile
+photo to GitHub; it makes it more fun to interact on GitHub if we all
+know what each other look like. Go to the following page and enter your
+first and last name in the Name field, and then consider uploading a
+profile photo.
 
-       dc_shell> set_app_var target_library "$env(ECE5745_STDCELLS)/stdcells.db"
-       dc_shell> set_app_var link_library   "* $env(ECE5745_STDCELLS)/stdcells.db"
+ - <https://github.com/settings/profile>
 
-We are now ready to read in the Verilog file which contains the top-level
-design and all referenced modules. We do this with two commands. The
-analyze command reads the Verilog RTL into an intermediate internal
-representation. The elaborate command recursively resolves all of the
-module references starting from the top-level module, and also infers
-various registers and/or advanced data-path components.
+Once you have a GitHub ID, please fill out the following online so the
+instructors know the mapping from NetID to GitHub ID:
 
-    dc_shell> analyze -format sverilog ../../sim/build/RegIncr4stageRTL__pickled.v
-    dc_shell> elaborate RegIncr4stageRTL
+ - <http://www.csl.cornell.edu/courses/ece2400/githubid>
 
-We can use the `check_design` command to make sure there are no obvious
-errors in our Verilog RTL.
+Before you can begin using GitHub, you need to create an SSH key pair on
+an `ecelinux` machine and upload the corresponding SSH public key to
+GitHub. GitHub uses these keys for authentication. The course setup
+script takes care of creating an SSH key pair which you can use. View the
+contents of your public key using the following commands:
 
-    dc_shell> check_design
+    :::bash
+    % cat ~/.ssh/ece2400-github.pub
 
-It is _critical_ that you review all warnings. Often times there will be
-something very wrong in your Verilog RTL which means any results from
-using the ASIC tools is completely bogus. Synopsys DC will output a
-warning, but Synopsys DC will usually just keep going, potentially
-producing a completely incorrect gate-level model!
+Use the following page to upload the public key to GitHub:
 
-We now need to create a clock constraint to tell Synopsys DC what our
-target cycle time is:
+ - <https://github.com/settings/ssh>
 
-    dc_shell> create_clock clk -name ideal_clock1 -period 1
+Click on _New SSH Key_, and then cut-and-paste the public key you
+displayed using cat into the key textbox. Give the key the title
+`ece2400-github`. Then click _Add SSH key_. To test things out try the
+following command:
 
-Finaly, the `compile` comamnd will do the actual logic synthesis:
+    :::bash
+    % ssh -T git@github.com
 
-    dc_shell> compile
+You may see a warning about the authenticity of the host. Don’t worry,
+this is supposed to happen the first time you access GitHub using your
+new key. Just enter `yes`. The GitHub server should output some text
+including your GitHub ID. Verify that the GitHub ID is correct, and then
+you should be all set.
 
-We write the output to a Verilog gate-level netlist and a `.ddc` file
-which we can use with Synopsys DV.
-
-    dc_shell> write -format verilog -hierarchy -output post-synth.v
-    dc_shell> write -format ddc     -hierarchy -output post-synth.ddc
-
-We can also generate usful reports about area, energy, and timing. Prof.
-Batten will spend some time explaining these reports:
-
-    dc_shell> report_resources -nosplit -hierarchy
-    dc_shell> report_timing -nosplit -transition_time -nets -attributes
-    dc_shell> report_area -nosplit -hierarchy
-    dc_shell> report_power -nosplit -hierarchy
-
-Make some notes about what you find. Note the total cell area used in
-this design. Finally, we go ahead and exit Synopsys DC.
-
-    dc_shell> exit
-
-Take a few minutes to examine the resulting Verilog gate-level netlist.
-Notice that the module hierarchy is preserved.
-
-    % less post-synth.v
-
-Take a close look at the implementation of the incrementer. What kind of
-standard cells has the synthesis tool chosen? What kind of adder
-microarchitecture?
-
-We can use the Synopsys Design Vision (DV) tool for browsing the
-resulting gate-level netlist, plotting critical path histograms, and
-generally analyzing our design. Start Synopsys DV and setup the
-`target_library` and `link_library` variables as before.
-
-    % design_vision-xg
-    design_vision> set_app_var target_library "$env(ECE5745_STDCELLS)/stdcells.db"
-    design_vision> set_app_var link_library   "* $env(ECE5745_STDCELLS)/stdcells.db"
-
-You can use the following steps to open the `.ddc` file generated during
-synthesis.
-
- - Choose _File > Read_ from the menu
- - Open the `post-synth.dcc` file
-
-You can use the following steps to view the gate-level schematic for the
-design.:
-
- - Select the `RegIncr4stageRTL` module in the _Logical Hierarchy_ panel
- - Choose _Schematic > New Schematic View_ from the menu
- - Double click the box representing the `RegIncr4stageRTL` in the schematic view
- - Continue to double click to move through the design hierarchy
-
-You can determine the type of module or gate by selecting the module or
-gate and choosing _Edit > Properties_ from the menu. Then look for
-`ref_name`. You should be able to see the schematic for a single stage of
-the pipline including the flip-flops and an `add` module. See if you can
-figure out why the synthesis tool has inserted AND gates in front of each
-flip-flop. If you look inside the `add` module you should be able to see
-the adder microarchitecture.
-
-You can use the following steps to view a histogram of path slack, and
-also to open a gave-level schematic of just the critical path.
-
- - Choose _Timing > Path Slack_ from the menu
- - Click _OK_ in the pop-up window
- - Select the left-most bar in the histogram to see list of most critical paths
- - Right click first path (the critical path) and choose _Path Schematic_
-
-Using Synopsys VCS for Fast-Functional Gate-Level Simulation
+4. Git Version Control System
 --------------------------------------------------------------------------
 
-Good ASIC designers are always paranoid and _never_ trust their tools.
-How do we know that the synthesized gate-level netlist is correct? One
-way we can check is to rerun our test suite on the gate-level model. We
-can do this using Synopsys VCS for fast-functional gatel-level
-simulation. _Fast-functional_ refers to the fact that this simulation
-will not take account any of the gate delays. All gates will take zero
-time and all signals will still change on the rising clock edge just like
-in RTL simulation. Here is how to run VCS for RTL simulation:
+In this course, we will be using Git as our revision control and source
+code management system. Git will enable us to adopt an agile development
+methodology so you (and your group) can rapidly collaborate and iterate
+on the design, verification, and evaluation of the assignments.
 
-    % cd $TOPDIR/asic/synopsys-vcs-ffgl-sim
-    % vcs -full64 -sverilog +lint=all -xprop=tmerge -override_timescale=1ns/1ps \
-        +delay_mode_zero \
-        +incdir+../../sim/build \
-        +vcs+dumpvars+vcs-ffgl-sim.vcd \
-        -top RegIncr4stageRTL_tb \
-        $ECE5745_STDCELLS/stdcells.v \
-        ../synopsys-dc-synth/post-synth.v \
-        ../../sim/build/RegIncr4stageRTL_test_4stage_random_tb.v
+### 4.1. Fork and Clone a Repo from GitHub
 
-This is a pretty long command line! So we provide you a shell script that
-has the command ready for you to use.
+Fork'ing a repo means making a copy of that repo for your own local use.
+We won't actually be forking repos for the programming assignments, but
+it is an easy way for you to grab some example code for the discussion
+section. Go to the example repo here:
 
-    % cd $TOPDIR/asic/synopsys-vcs-ffgl-sim
-    % source run.sh
+ - <https://github.com/cornell-ece2400/ece2400-sec01>
 
-You should see a `simv` binary which is the compiled RTL simulator which
-you can run like this:
+Click on the "Fork" button. Wait a few seconds and then visit the new
+copy of this repo in your own person GitHub workspace:
 
-    % cd $TOPDIR/asic/synopsys-vcs-ffgl-sim
-    % ./simv
+ - `https://github.com/githubid/ece2400-sec01`
 
-It should pass the test. Now let's look at the resulting waveforms.
+Where `githubid` is your GitHubID. Now let's clone your new repo to the
+`ecelinux` machine.
 
-    % cd $TOPDIR/asic/synopsys-vcs-ffgl-sim
-    % gtkwave vcs-ffgl-sim.vcd
+    :::bash
+    % cd ${HOME}/ece2400
+    % git clone git@github.com:githubid/ece2400-sec01 sec01
+    % cd sec01
+    % cat README.md
 
-Browse the signal hierarchy and display all the waveforms for a subset of
-the gate-level netlist using these steps:
+Where `githubid` is your GitHubID.
 
- - Expand out the signal tree until you find an _add_ module
- - Right click on the _add_ module and choose _Recurse Import > Append_
+### 4.2. Adding and Committing Files to Local Repository
 
-Notice how we can see all of the single-bit signals corresponding to each
-gate in the gate-level netlist, and how these signals all change on the
-rising clock edge without any delays.
+Now let's add some new files to the repository. Use Micro to create a
+file named `warm-colors.txt` with three warm colors:
 
-To-Do On Your Own
+    red
+    orange
+    yellow
+
+Now use your favorite text editor again to create a file named
+`cool-colors.txt` with three cool colors.
+
+    blue
+    green
+    purple
+
+Now let's add these files to our repository. First use the `git status`
+command to check on the status of the repository.
+
+    :::bash
+    % cd ${HOME}/ece2400/sec01
+    % git status
+
+You should see that git has noticed two "untracked files" which are in
+the working directory but are not currently being tracked by git. Let's
+"add" these two files to git's "staging" area so it now knows it should
+keep track of them:
+
+    :::bash
+    % cd ${HOME}/ece2400/sec01
+    % git add warm-colors.txt
+    % git add cool-colors.txt
+    % git status
+
+The status of these two files have changed. Git reports that both of the
+new files are ready to be committed. Let's go ahead and commit these
+changes into your local repository.
+
+    :::bash
+    % cd ${HOME}/ece2400/sec01
+    % git commit -m "add some colors"
+
+Let's now use `echo` and the `>>` command output redirection operator to
+add `cyan` to the end of our `cool-colors.txt` file. We can then view our
+changes from the command line using `cat`, and use `git status` and then
+`git commit` to try and commit our changes.
+
+    :::bash
+    % cd ${HOME}/ece2400/sec01
+    % echo "cyan" >> cool-colors.txt
+    % cat cool-colors.txt
+    % git status
+    % git commit -m "add cyan"
+
+Git will report that there are no changes added to the commit. So even
+though Git is tracking `cool-colors.txt` and knows it has changed, we
+still must explicitly add the files we want to commit. We recommend using
+the `-a` command line option with the `git commit` command to tell Git to
+add any file which has changed and was previously added to the repository
+before doing the commit.
+
+    :::bash
+    % cd ${HOME}/ece2400/sec01
+    % git status
+    % git commit -a -m "add cyan"
+
+Now the changes are committed. You can use `git log` to see a log of the
+commits in your local repository.
+
+    :::bash
+    % cd ${HOME}/ece2400/sec01
+    % git log
+
+### 4.3. Pushing Files to GitHub
+
+Note that nothing has happened on GitHub yet. GitHub does _not_ know
+anything about these local changes. We need to explicitly "push" our new
+commits up to GitHub like this:
+
+    :::bash
+    % cd ${HOME}/ece2400/sec01
+    % git push
+
+Now go to the repository page using the GitHub web interface and verify
+that there are two new files.
+
+ - `https://github.com/githubid/ece2400-sec01`
+
+### 4.4. Pulling Files from GitHub
+
+Let's try making a change to this repository through the GitHub
+web interface.
+
+ - `https://github.com/githubid/ece2400-sec01`
+
+Click on _Add file_ and then _Create new file_. Name the file
+`languages.txt` and add a list of programming languages:
+
+    C
+    C++
+    Python
+    MATLAB
+    Java
+
+Now click _Commit new file_. Verify that there is a new file in the repo
+using the GitHub web interface. Now let's "pull" these new changes from
+GitHub to your local repo on `ecelinux`:
+
+    :::bash
+    % cd ${HOME}/ece2400/sec01
+    % git pull
+    % cat languages.txt
+
+This will be the basic GitHub workflow were students first use `clone` to
+get a copy of their repository, use `commit -a` to commit their code to
+the local repository, and then use `pull` and `push` to synchronize their
+repository with the repository on GitHub.
+
+6. To-Do On Your Own
 --------------------------------------------------------------------------
 
-If you have time, push the multi-stage registered incrementer through the
-flow again, but this type use a faster clock constraint. This will force
-the tools to be more agress as they attempt to "meet timing". Try using a
-clock constraint of 0.3ns instead of 1ns. Use `report_resources` to
-determine what kind of adder microarchitecture the synthesis tool has
-chosen. Use `report_timing` to see if the tool is able to generate a
-gate-level netlist that can really run at 333MHz. Use `report_area` to
-compare the area of the design with the 0.3ns clock constraint to the
-design with the 1ns clock constraint. Use Synopsys DV to visualize the
-improved adder microarchitecture.
+If you have time, add `maroon` to the `warm-colors.txt` file you created
+earlier using either Micro. Save the file and then view your
+changes from the command line using `cat`. Then use `git status` and `git
+commit -a` to add these changes to local repository, and then use `git
+push` to push these changes up to GitHub. View the changes using the
+GitHub web interface.
+
+Then try editing a file using the GitHub web interface. Click on the
+`warm-colors.txt` file and then click on the pencil in the right-hand
+corner to edit this text file. Add another warm color. Click _Commit
+changes_. Then pull these changes to the local repository on the
+`ecelinux` server and verify that your new warm color is included.
+
 
